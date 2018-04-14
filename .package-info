@@ -1,0 +1,10 @@
+###
+# Package information
+##
+
+APP_NAME = mock-security
+VERSION = 0.1.0
+
+REQUIREMENTS = docker python3
+
+# package-info

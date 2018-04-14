@@ -1,0 +1,14 @@
+###
+# Files for docker build to ignore
+##
+
+# Personalization
+/.env
+/Makefile
+
+# Python
+*/__pycache__
+*.pyo
+*.pyc
+
+# .dockerignore
