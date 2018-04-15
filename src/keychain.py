@@ -23,6 +23,11 @@ class Keychain(object):
         self.default = kwargs.pop('default', False)
         self.password = kwargs.pop('password', None)
         self.lock_on_sleep = kwargs.pop('lock_on_sleep', False)
+        self.certificates = kwargs.pop('certificates', [])
+
+        if len(Keychain.__keychains__) < 1:
+            self.default = True
+        # fi
 
         Keychain.__keychains__[self.name] = self
     # __init__
@@ -55,7 +60,8 @@ class Keychain(object):
             "default": self.default,
             "password": self.password,
             "locked": self.locked,
-            "lock_on_sleep": self.lock_on_sleep
+            "lock_on_sleep": self.lock_on_sleep,
+            "certificates": [c.__properties__ for c in self.certificates]
         }
     # __properties__
 
@@ -70,10 +76,18 @@ class Keychain(object):
         self.locked = True
     # unlock
 
+    def import_certificate(self, filepath, **kwargs):
+        self.certificates.append(Certificate(filepath, **kwargs))
+    # import_cert
+
     @classmethod
-    def find(cls, name):
+    def find(cls, name, default=None):
         if name in cls.__keychains__:
             return cls.__keychains__[name]
+        # fi
+
+        if default is not None:
+            return default
         # fi
 
         raise Exception('No keychain `%s` found' % name)
@@ -127,9 +141,31 @@ class Keychain(object):
     def delete(cls, name):
         obj = cls.find(name)
         del cls.__keychains__[obj.name]
-    # end def delete
+    # delete
 
 # Keychain
+
+class Certificate(object):
+    def __init__(self, filepath, **kwargs):
+        self.filepath = filepath
+        self.applications = kwargs.pop('applications', [])
+        self.passphrase = kwargs.pop('passphrase', None)
+    # __init__
+
+    @property
+    def __properties__(self):
+        return {
+            "filepath": self.filepath,
+            "applications": self.applications,
+            "passphrase": self.passphrase
+        }
+    # __properties__
+# Cert
+
+
+###
+# Utility functions
+##
 
 def keychain_decorator(fn):
     def _keychain_decorator(*args, **kwargs):
@@ -141,7 +177,7 @@ def keychain_decorator(fn):
     # _keychain_decorator
 
     return _keychain_decorator
-# end def
+# keychain_decorator
 
 @keychain_decorator
 def create_keychain(name, **kwargs):
@@ -180,6 +216,11 @@ def unlock_keychain(name, **kwargs):
 def lock_keychain(name, **kwargs):
     Keychain.find(name).lock()
 # unlock_keychain
+
+@keychain_decorator
+def import_certificate(name=None, **kwargs):
+    Keychain.find(name, Keychain.DEFAULT).import_certificate(**kwargs)
+# import_certificate
 
 if __name__ == '__main__':
     Keychain.load(_get_keychain_file())

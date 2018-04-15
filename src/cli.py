@@ -2,7 +2,7 @@
 
 import sys
 import argparse
-from keychain import create_keychain, delete_keychain, default_keychain, set_keychain_settings, unlock_keychain, lock_keychain
+from keychain import create_keychain, delete_keychain, default_keychain, set_keychain_settings, unlock_keychain, lock_keychain, import_certificate
 
 parser = argparse.ArgumentParser(description='Mock security')
 subparsers = parser.add_subparsers(help='sub-command help')
@@ -36,6 +36,12 @@ set_keychain_settings_parser.add_argument('-t', dest='timeout', help='The timeou
 set_keychain_settings_parser.add_argument('-l', dest='lock_on_sleep', action='store_true', help='Lock keychain when the system sleeps')
 set_keychain_settings_parser.add_argument('name', help='The keychain location')
 set_keychain_settings_parser.set_defaults(func=set_keychain_settings)
+
+import_parser = subparsers.add_parser('import', help='Imports a secret')
+import_parser.add_argument('-k', dest='name', help='The key chain to add this secret to')
+import_parser.add_argument('-P', dest='passphrase', help='The passphrase for the secret')
+import_parser.add_argument('filepath', help='The certificate location')
+import_parser.set_defaults(func=import_certificate)
 
 if __name__ == '__main__':
     argv = sys.argv[1:]

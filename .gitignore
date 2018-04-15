@@ -3,6 +3,7 @@
 ##
 
 /.env
+/.envrc
 
 ###
 # Python Ignores
