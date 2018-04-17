@@ -23,7 +23,7 @@ class Keychain(object):
         self.default = kwargs.pop('default', False)
         self.password = kwargs.pop('password', None)
         self.lock_on_sleep = kwargs.pop('lock_on_sleep', False)
-        self.certificates = kwargs.pop('certificates', [])
+        self.certificates = [c if isinstance(c, Certificate) else Certificate(**c) for c in kwargs.pop('certificates', [])]
 
         if len(Keychain.__keychains__) < 1:
             self.default = True
