@@ -40,6 +40,7 @@ set_keychain_settings_parser.set_defaults(func=set_keychain_settings)
 import_parser = subparsers.add_parser('import', help='Imports a secret')
 import_parser.add_argument('-k', dest='name', help='The key chain to add this secret to')
 import_parser.add_argument('-P', dest='passphrase', help='The passphrase for the secret')
+import_parser.add_argument('-T', dest='applications', nargs='*', help='The applications that are allowed to use the certificate')
 import_parser.add_argument('filepath', help='The certificate location')
 import_parser.set_defaults(func=import_certificate)
 
