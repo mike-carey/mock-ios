@@ -126,7 +126,7 @@ def default_keychain(name, **kwargs):
 # default_keychain
 
 @Keychain.decorator
-def delete_keychain(name):
+def delete_keychain(name, **kwargs):
     Keychain.delete(name)
 # delete_keychain
 
