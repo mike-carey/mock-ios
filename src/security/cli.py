@@ -14,7 +14,7 @@ create_keychain_parser.add_argument('name', help='The keychain to create')
 create_keychain_parser.set_defaults(func=create_keychain)
 
 delete_keychain_parser = subparsers.add_parser('delete-keychain', help='Deletes a keychain')
-delete_keychain_parser.add_argument('-p', help='The password for the keychain')
+delete_keychain_parser.add_argument('-p', dest='password', help='The password for the keychain')
 delete_keychain_parser.add_argument('name', help='The keychain to delete')
 delete_keychain_parser.set_defaults(func=delete_keychain)
 
