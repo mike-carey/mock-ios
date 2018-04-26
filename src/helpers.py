@@ -1,7 +1,10 @@
 ###
-# Taken from https://stackoverflow.com/questions/5189699/how-to-make-a-class-property#answer-5191224
+#
 ##
 
+import os
+
+# Taken from https://stackoverflow.com/questions/5189699/how-to-make-a-class-property#answer-5191224
 class ClassPropertyDescriptor(object):
 
     def __init__(self, fget, fset=None):
@@ -30,5 +33,9 @@ def classproperty(func):
         func = classmethod(func)
 
     return ClassPropertyDescriptor(func)
+
+def touch(fname, times=None):
+    with open(fname, 'a'):
+        os.utime(fname, times)
 
 # helpers
