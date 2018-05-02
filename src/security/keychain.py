@@ -24,6 +24,7 @@ class Keychain(Serializable):
         self.password = kwargs.pop('password', None)
         self.lock_on_sleep = kwargs.pop('lock_on_sleep', False)
         self.certificates = [c if isinstance(c, Certificate) else Certificate(**c) for c in kwargs.pop('certificates', [])]
+        self.partitions = [p if isinstance(p, Partition) else Partition(**p) for p in kwargs.pop('partitions', [])]
 
         if len(Keychain.INVENTORY) < 1:
             self.default = True
@@ -34,7 +35,7 @@ class Keychain(Serializable):
 
     @classproperty
     def DEFAULT(cls):
-        for k, v in cls.__keychains__.items():
+        for k, v in cls.INVENTORY.items():
             if v.default is True:
                 return v
             # fi
@@ -50,14 +51,13 @@ class Keychain(Serializable):
             "password": self.password,
             "locked": self.locked,
             "lock_on_sleep": self.lock_on_sleep,
-            "certificates": [c.serialize() for c in self.certificates]
+            "certificates": [c.serialize() for c in self.certificates],
+            "partitions": [p.serialize() for p in self.partitions]
         }
     # __properties__
 
     def unlock(self, **kwargs):
-        if kwargs.pop('password', None) != self.password:
-            raise Exception('Password does not match')
-        # fi
+        self.check_password(kwargs.pop('password'))
         self.locked = False
     # unlock
 
@@ -65,19 +65,35 @@ class Keychain(Serializable):
         self.locked = True
     # unlock
 
+    def check_password(self, password):
+        if self.password != password:
+            raise Exception("Invalid password")
+        # fi
+    # check_password
+
     def import_certificate(self, filepath, **kwargs):
         self.certificates.append(Certificate(filepath, **kwargs))
     # import_cert
+
+    def set_partitions(self, *partition_ids, **kwargs):
+        self.check_password(kwargs.pop('password'))
+        self.partitions = [Partition(pid, **kwargs) for pid in partition_ids]
+    # set_partitions
 
     @classmethod
     def find(cls, name):
         try:
             return super(cls, cls).find(name)
         except Exception as e:
-            if cls.DEFAULT is not None:
+            default = cls.DEFAULT
+            if default is not None:
                 return default
             # fi
         # end
+
+        if name is None:
+            raise Exception('Could not find a default keychain')
+        # fi
 
         raise Exception('No keychain `%s` found' % name)
     # find
@@ -107,9 +123,22 @@ class Certificate(Serializable):
             "applications": self.applications,
             "passphrase": self.passphrase
         }
-    # __properties__
+    # serialize
 # Cert
 
+
+class Partition(Serializable):
+    def __init__(self, id, **kwargs):
+        self.id = id
+        self.can_sign = kwargs.pop('can_sign', None)
+    # __init__
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "can_sign": self.can_sign
+        }
+    # serialize
 
 ###
 # Utility functions
@@ -152,6 +181,11 @@ def lock_keychain(name, **kwargs):
 def import_certificate(name=None, **kwargs):
     Keychain.find(name).import_certificate(**kwargs)
 # import_certificate
+
+@Keychain.decorator
+def set_key_partition_list(name=None, **kwargs):
+    Keychain.find(name).set_partitions(*kwargs.pop('partition_ids', '').split(','), **kwargs)
+# set_key_partition_list
 
 if __name__ == '__main__':
     Keychain.load(Keychain.FILE)

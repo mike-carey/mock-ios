@@ -2,7 +2,7 @@
 
 import sys
 import argparse
-from keychain import create_keychain, delete_keychain, default_keychain, set_keychain_settings, unlock_keychain, lock_keychain, import_certificate
+from keychain import create_keychain, delete_keychain, default_keychain, set_keychain_settings, unlock_keychain, lock_keychain, import_certificate, set_key_partition_list
 
 parser = argparse.ArgumentParser(description='Mock security')
 subparsers = parser.add_subparsers(help='sub-command help')
@@ -43,6 +43,13 @@ import_parser.add_argument('-P', dest='passphrase', help='The passphrase for the
 import_parser.add_argument('-T', dest='applications', nargs='*', help='The applications that are allowed to use the certificate')
 import_parser.add_argument('filepath', help='The certificate location')
 import_parser.set_defaults(func=import_certificate)
+
+set_key_partition_list_parser = subparsers.add_parser('set-key-partition-list', help='Set the parition list of a key')
+set_key_partition_list_parser.add_argument('-k', dest='password', help='The password for the keychain')
+set_key_partition_list_parser.add_argument('-S', dest='partition_ids', help='A comma-separated list of allowed partition IDs')
+set_key_partition_list_parser.add_argument('-s', dest='can_sign', action='store_true', help='Match keys that can sign')
+set_key_partition_list_parser.add_argument('name', nargs='?', help='The keychain to use; otherwise, the default keychain will be used')
+set_key_partition_list_parser.set_defaults(func=set_key_partition_list)
 
 if __name__ == '__main__':
     argv = sys.argv[1:]
